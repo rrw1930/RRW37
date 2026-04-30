@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏓 乒乓球游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .game-container {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+
+        canvas {
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(180deg, #0a0a1a 0%, #1a1a3a 100%);
+            border: 2px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .score-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            min-width: 220px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .score-panel h2 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: #00d4ff;
+            text-align: center;
+        }
+
+        .scores {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .score-box {
+            text-align: center;
+        }
+
+        .score-value {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .score-label {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        .control-info {
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid #00d4ff;
+            margin-bottom: 20px;
+        }
+
+        .control-info h3 {
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .control-info ul {
+            padding-left: 20px;
+            color: #ccc;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.1rem;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .selector {
+            margin-top: 15px;
+        }
+
+        .selector label {
+            display: block;
+            margin-bottom: 10px;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .menu-content {
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-content h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .menu-content p {
+            color: #aaa;
+            margin-bottom: 30px;
+        }
+
+        .menu-btn {
+            width: 200px;
+            padding: 15px;
+            margin: 10px;
+            font-size: 1.1rem;
+        }
+
+        .leaderboard {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .leaderboard h3 {
+            color: #00d4ff;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+
+        .leaderboard-rank {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .leaderboard-name {
+            flex: 1;
+            margin-left: 10px;
+        }
+
+        .leaderboard-score {
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+
+        .win-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            z-index: 90;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .win-modal h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #ffd700;
+        }
+
+        .win-modal p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 80;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-content">
+            <h1>🏓 乒乓球游戏</h1>
+            <p>体验经典的乒乓球对战！</p>
+            
+            <button class="btn-primary menu-btn" id="startSingleBtn">🎮 单人模式</button>
+            <button class="btn-secondary menu-btn" id="startMultiBtn">👥 双人模式</button>
+            
+            <div class="leaderboard">
+                <h3>🏆 排行榜</h3>
+                <div id="leaderboardList">
+                    <div class="leaderboard-item">
+                        <span class="leaderboard-rank">1.</span>
+                        <span class="leaderboard-name">玩家1</span>
+                        <span class="leaderboard-score">100</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay hidden" id="modalOverlay"></div>
+    <div class="win-modal hidden" id="winModal">
+        <h2>🎉 比赛结束！</h2>
+        <p id="winnerText">玩家获胜！</p>
+        <button class="btn-primary" id="backToMenuBtn">🏠 返回菜单</button>
+        <button class="btn-secondary" id="rematchBtn">🔄 再来一局</button>
+    </div>
+
+    <h1>🏓 乒乓球游戏</h1>
+    
+    <div class="game-container">
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+        
+        <div class="score-panel">
+            <h2>📊 计分板</h2>
+            
+            <div class="scores">
+                <div class="score-box">
+                    <div class="score-value" id="playerScore">0</div>
+                    <div class="score-label">玩家1</div>
+                </div>
+                <div class="score-box">
+                    <div class="score-value" id="player2Score">0</div>
+                    <div class="score-label">玩家2</div>
+                </div>
+            </div>
+
+            <div class="control-info">
+                <h3>🎮 控制方式</h3>
+                <div id="controlInfoContent">
+                    <ul>
+                        <li>🖱️ 鼠标移动控制球拍</li>
+                        <li>⬆️⬇️ 上下箭头键控制</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="selector">
+                <label>🏆 胜利分数</label>
+                <select id="winScore">
+                    <option value="5">5 分</option>
+                    <option value="11" selected>11 分</option>
+                    <option value="15">15 分</option>
+                    <option value="21">21 分</option>
+                </select>
+            </div>
+
+            <div class="selector">
+                <label>⚙️ 难度等级</label>
+                <select id="difficulty">
+                    <option value="easy">🐣 简单</option>
+                    <option value="normal" selected>🐔 普通</option>
+                    <option value="hard">🦅 困难</option>
+                    <option value="expert">🔥 专家</option>
+                </select>
+            </div>
+
+            <button class="btn-secondary" id="pauseBtn">⏸️ 暂停</button>
+            <button class="btn-primary" id="resetBtn">🔄 重新开始</button>
+            <button class="btn-secondary" id="menuBtn">🏠 返回菜单</button>
+            
+            <div class="status" id="status">点击开始游戏</div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let paddleWidth = 15;
+        let paddleHeight = 100;
+        let ballRadius = 10;
+        
+        let audioContext = null;
+        let audioInitialized = false;
+        
+        let gameMode = 'single';
+        let winScore = 11;
+        let isPaused = false;
+        
+        const difficulties = {
+            easy: { computerSpeed: 3, ballSpeed: 4, name: '简单' },
+            normal: { computerSpeed: 5, ballSpeed: 5, name: '普通' },
+            hard: { computerSpeed: 7, ballSpeed: 6, name: '困难' },
+            expert: { computerSpeed: 9, ballSpeed: 7, name: '专家' }
+        };
+        
+        let currentDifficulty = 'normal';
+        
+        let player1Paddle = {
+            x: 30,
+            y: canvas.height / 2 - paddleHeight / 2,
+            width: paddleWidth,
+            height: paddleHeight,
+            speed: 10
+        };
+        
+        let player2Paddle = {
+            x: canvas.width - 30 - paddleWidth,
+            y: canvas.height / 2 - paddleHeight / 2,
+            width: paddleWidth,
+            height: paddleHeight,
+            speed: 10
+        };
+        
+        let ball = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: ballRadius,
+            dx: 5,
+            dy: 3,
+            speed: 5
+        };
+        
+        let player1Score = 0;
+        let player2Score = 0;
+        let isGameRunning = false;
+        let animationId;
+        
+        let keys = {
+            up: false,
+            down: false,
+            w: false,
+            s: false
+        };
+        
+        function initAudio() {
+            if (!audioInitialized) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                audioInitialized = true;
+            }
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }
+        
+        function playSound(frequency, duration, type = 'sine', volume = 0.1) {
+            if (!audioInitialized) initAudio();
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            oscillator.type = type;
+            
+            gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+        
+        function playPaddleSound() {
+            playSound(800, 0.1, 'square', 0.15);
+        }
+        
+        function playWallSound() {
+            playSound(400, 0.05, 'sine', 0.1);
+        }
+        
+        function playScoreSound(isPlayer1) {
+            if (isPlayer1) {
+                playSound(523, 0.15, 'sine', 0.2);
+                setTimeout(() => playSound(659, 0.15, 'sine', 0.2), 100);
+                setTimeout(() => playSound(784, 0.2, 'sine', 0.2), 200);
+            } else {
+                playSound(659, 0.15, 'sine', 0.2);
+                setTimeout(() => playSound(784, 0.15, 'sine', 0.2), 100);
+                setTimeout(() => playSound(880, 0.2, 'sine', 0.2), 200);
+            }
+        }
+        
+        function playWinSound() {
+            const notes = [523, 659, 784, 1047];
+            notes.forEach((note, i) => {
+                setTimeout(() => playSound(note, 0.2, 'sine', 0.2), i * 150);
+            });
+        }
+        
+        function resizeCanvas() {
+            const maxWidth = Math.min(window.innerWidth - 280, 900);
+            const maxHeight = Math.min(window.innerHeight - 150, 600);
+            
+            canvas.width = maxWidth;
+            canvas.height = maxHeight;
+            
+            paddleHeight = Math.max(80, canvas.height * 0.2);
+            ballRadius = Math.max(8, canvas.width * 0.012);
+            
+            resetPositions();
+        }
+        
+        function resetPositions() {
+            player1Paddle.width = paddleWidth;
+            player1Paddle.height = paddleHeight;
+            player1Paddle.x = 30;
+            player1Paddle.y = canvas.height / 2 - paddleHeight / 2;
+            
+            player2Paddle.width = paddleWidth;
+            player2Paddle.height = paddleHeight;
+            player2Paddle.x = canvas.width - 30 - paddleWidth;
+            player2Paddle.y = canvas.height / 2 - paddleHeight / 2;
+            
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            ball.radius = ballRadius;
+        }
+        
+        function setDifficulty(difficulty) {
+            currentDifficulty = difficulty;
+            const config = difficulties[difficulty];
+            player2Paddle.speed = gameMode === 'single' ? config.computerSpeed : 10;
+            ball.speed = config.ballSpeed;
+        }
+        
+        function setWinScore(score) {
+            winScore = parseInt(score);
+        }
+        
+        function setGameMode(mode) {
+            gameMode = mode;
+            document.getElementById('player2Score').textContent = '0';
+            document.getElementById('difficulty').disabled = mode === 'multi';
+            setDifficulty(currentDifficulty);
+            
+            const controlInfo = document.getElementById('controlInfoContent');
+            if (mode === 'multi') {
+                controlInfo.innerHTML = `
+                    <ul>
+                        <li>🎮 玩家1：⬆️⬇️ 箭头键 / 鼠标</li>
+                        <li>🎮 玩家2：W / S 键</li>
+                    </ul>
+                `;
+                document.querySelector('.score-box:last-child .score-label').textContent = '玩家2';
+            } else {
+                controlInfo.innerHTML = `
+                    <ul>
+                        <li>🖱️ 鼠标移动控制球拍</li>
+                        <li>⬆️⬇️ 上下箭头键控制</li>
+                    </ul>
+                `;
+                document.querySelector('.score-box:last-child .score-label').textContent = '电脑';
+            }
+        }
+        
+        function drawPaddle(paddle, color) {
+            const gradient = ctx.createLinearGradient(
+                paddle.x, paddle.y,
+                paddle.x + paddle.width, paddle.y
+            );
+            gradient.addColorStop(0, color.primary);
+            gradient.addColorStop(1, color.secondary);
+            
+            ctx.beginPath();
+            ctx.roundRect(paddle.x, paddle.y, paddle.width, paddle.height, 5);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+        
+        function drawBall() {
+            const gradient = ctx.createRadialGradient(
+                ball.x - 3, ball.y - 3, 0,
+                ball.x, ball.y, ball.radius
+            );
+            gradient.addColorStop(0, '#fff');
+            gradient.addColorStop(1, '#00d4ff');
+            
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+        
+        function drawCenterLine() {
+            ctx.setLineDash([15, 10]);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+        
+        function drawBackground() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#0a0a1a');
+            gradient.addColorStop(1, '#1a1a3a');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            drawCenterLine();
+        }
+        
+        function movePlayer1Paddle() {
+            if (keys.up && player1Paddle.y > 0) {
+                player1Paddle.y -= player1Paddle.speed;
+            }
+            if (keys.down && player1Paddle.y < canvas.height - player1Paddle.height) {
+                player1Paddle.y += player1Paddle.speed;
+            }
+        }
+        
+        function movePlayer2Paddle() {
+            if (gameMode === 'multi') {
+                if (keys.w && player2Paddle.y > 0) {
+                    player2Paddle.y -= player2Paddle.speed;
+                }
+                if (keys.s && player2Paddle.y < canvas.height - player2Paddle.height) {
+                    player2Paddle.y += player2Paddle.speed;
+                }
+            } else {
+                const paddleCenter = player2Paddle.y + player2Paddle.height / 2;
+                const ballCenter = ball.y;
+                
+                if (paddleCenter < ballCenter - 15) {
+                    player2Paddle.y += player2Paddle.speed;
+                } else if (paddleCenter > ballCenter + 15) {
+                    player2Paddle.y -= player2Paddle.speed;
+                }
+            }
+            
+            player2Paddle.y = Math.max(0, Math.min(canvas.height - player2Paddle.height, player2Paddle.y));
+        }
+        
+        function moveBall() {
+            ball.x += ball.dx;
+            ball.y += ball.dy;
+            
+            if (ball.y - ball.radius <= 0 || ball.y + ball.radius >= canvas.height) {
+                ball.dy = -ball.dy;
+                playWallSound();
+            }
+            
+            if (ball.x - ball.radius <= player1Paddle.x + player1Paddle.width &&
+                ball.y >= player1Paddle.y &&
+                ball.y <= player1Paddle.y + player1Paddle.height) {
+                ball.dx = Math.abs(ball.dx) * 1.05;
+                const hitPos = (ball.y - player1Paddle.y) / player1Paddle.height;
+                ball.dy = ball.speed * (hitPos - 0.5) * 2;
+                playPaddleSound();
+            }
+            
+            if (ball.x + ball.radius >= player2Paddle.x &&
+                ball.y >= player2Paddle.y &&
+                ball.y <= player2Paddle.y + player2Paddle.height) {
+                ball.dx = -Math.abs(ball.dx) * 1.05;
+                const hitPos = (ball.y - player2Paddle.y) / player2Paddle.height;
+                ball.dy = ball.speed * (hitPos - 0.5) * 2;
+                playPaddleSound();
+            }
+            
+            if (ball.x - ball.radius <= 0) {
+                player2Score++;
+                playScoreSound(false);
+                updateScore();
+                resetBall(true);
+            }
+            
+            if (ball.x + ball.radius >= canvas.width) {
+                player1Score++;
+                playScoreSound(true);
+                updateScore();
+                resetBall(false);
+            }
+        }
+        
+        function resetBall(player1Served) {
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            ball.speed = difficulties[currentDifficulty].ballSpeed;
+            ball.dx = player1Served ? difficulties[currentDifficulty].ballSpeed : -difficulties[currentDifficulty].ballSpeed;
+            ball.dy = (Math.random() - 0.5) * 6;
+            isGameRunning = false;
+            document.getElementById('status').textContent = '点击开始游戏';
+        }
+        
+        function updateScore() {
+            document.getElementById('playerScore').textContent = player1Score;
+            document.getElementById('player2Score').textContent = player2Score;
+            
+            if (player1Score >= winScore) {
+                showWinModal(gameMode === 'single' ? '玩家' : '玩家1');
+            } else if (player2Score >= winScore) {
+                showWinModal(gameMode === 'single' ? '电脑' : '玩家2');
+            }
+        }
+        
+        function showWinModal(winner) {
+            isGameRunning = false;
+            cancelAnimationFrame(animationId);
+            playWinSound();
+            
+            if (gameMode === 'single') {
+                saveScore(player1Score);
+            }
+            
+            document.getElementById('winnerText').textContent = `${winner} 获胜！`;
+            document.getElementById('modalOverlay').classList.remove('hidden');
+            document.getElementById('winModal').classList.remove('hidden');
+        }
+        
+        function saveScore(score) {
+            const leaderboard = getLeaderboard();
+            leaderboard.push({ name: '玩家', score: score });
+            leaderboard.sort((a, b) => b.score - a.score);
+            leaderboard.splice(10);
+            localStorage.setItem('pingpong_leaderboard', JSON.stringify(leaderboard));
+            updateLeaderboard();
+        }
+        
+        function getLeaderboard() {
+            const stored = localStorage.getItem('pingpong_leaderboard');
+            return stored ? JSON.parse(stored) : [
+                { name: '职业选手', score: 500 },
+                { name: '新手玩家', score: 300 },
+                { name: '业余爱好者', score: 200 },
+                { name: '初学者', score: 100 },
+                { name: '路人甲', score: 50 }
+            ];
+        }
+        
+        function updateLeaderboard() {
+            const leaderboard = getLeaderboard();
+            const list = document.getElementById('leaderboardList');
+            list.innerHTML = leaderboard.map((item, index) => `
+                <div class="leaderboard-item">
+                    <span class="leaderboard-rank">${index + 1}.</span>
+                    <span class="leaderboard-name">${item.name}</span>
+                    <span class="leaderboard-score">${item.score}</span>
+                </div>
+            `).join('');
+        }
+        
+        function gameLoop() {
+            drawBackground();
+            drawPaddle(player1Paddle, { primary: '#00d4ff', secondary: '#0066cc' });
+            drawPaddle(player2Paddle, { primary: '#ff6b6b', secondary: '#cc4444' });
+            drawBall();
+            
+            if (isGameRunning && !isPaused) {
+                movePlayer1Paddle();
+                movePlayer2Paddle();
+                moveBall();
+            }
+            
+            animationId = requestAnimationFrame(gameLoop);
+        }
+        
+        function startGame() {
+            player1Score = 0;
+            player2Score = 0;
+            updateScore();
+            resetPositions();
+            resetBall(true);
+            isPaused = false;
+            document.getElementById('pauseBtn').textContent = '⏸️ 暂停';
+            document.getElementById('menuOverlay').classList.add('hidden');
+        }
+        
+        function togglePause() {
+            isPaused = !isPaused;
+            document.getElementById('pauseBtn').textContent = isPaused ? '▶️ 继续' : '⏸️ 暂停';
+            document.getElementById('status').textContent = isPaused ? '游戏已暂停' : '游戏进行中...';
+        }
+        
+        function backToMenu() {
+            isGameRunning = false;
+            cancelAnimationFrame(animationId);
+            document.getElementById('menuOverlay').classList.remove('hidden');
+            document.getElementById('modalOverlay').classList.add('hidden');
+            document.getElementById('winModal').classList.add('hidden');
+            updateLeaderboard();
+        }
+        
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseY = e.clientY - rect.top;
+            player1Paddle.y = mouseY - player1Paddle.height / 2;
+            player1Paddle.y = Math.max(0, Math.min(canvas.height - player1Paddle.height, player1Paddle.y));
+        });
+        
+        canvas.addEventListener('click', () => {
+            initAudio();
+            if (!isGameRunning && !isPaused) {
+                isGameRunning = true;
+                document.getElementById('status').textContent = '游戏进行中...';
+            }
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowUp') keys.up = true;
+            if (e.key === 'ArrowDown') keys.down = true;
+            if (e.key === 'w' || e.key === 'W') keys.w = true;
+            if (e.key === 's' || e.key === 'S') keys.s = true;
+            if (e.key === ' ' && !isGameRunning && !isPaused) {
+                initAudio();
+                isGameRunning = true;
+                document.getElementById('status').textContent = '游戏进行中...';
+            }
+            if (e.key === 'Escape') {
+                if (document.getElementById('menuOverlay').classList.contains('hidden')) {
+                    backToMenu();
+                }
+            }
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowUp') keys.up = false;
+            if (e.key === 'ArrowDown') keys.down = false;
+            if (e.key === 'w' || e.key === 'W') keys.w = false;
+            if (e.key === 's' || e.key === 'S') keys.s = false;
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            player1Score = 0;
+            player2Score = 0;
+            updateScore();
+            resetPositions();
+            resetBall(true);
+        });
+        
+        document.getElementById('pauseBtn').addEventListener('click', togglePause);
+        
+        document.getElementById('menuBtn').addEventListener('click', backToMenu);
+        
+        document.getElementById('difficulty').addEventListener('change', (e) => {
+            setDifficulty(e.target.value);
+        });
+        
+        document.getElementById('winScore').addEventListener('change', (e) => {
+            setWinScore(e.target.value);
+        });
+        
+        document.getElementById('startSingleBtn').addEventListener('click', () => {
+            setGameMode('single');
+            startGame();
+        });
+        
+        document.getElementById('startMultiBtn').addEventListener('click', () => {
+            setGameMode('multi');
+            startGame();
+        });
+        
+        document.getElementById('backToMenuBtn').addEventListener('click', backToMenu);
+        
+        document.getElementById('rematchBtn').addEventListener('click', () => {
+            document.getElementById('modalOverlay').classList.add('hidden');
+            document.getElementById('winModal').classList.add('hidden');
+            player1Score = 0;
+            player2Score = 0;
+            updateScore();
+            resetPositions();
+            resetBall(true);
+        });
+        
+        window.addEventListener('resize', resizeCanvas);
+        
+        updateLeaderboard();
+        resizeCanvas();
+        gameLoop();
+    </script>
+</body>
+</html>
