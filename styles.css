@@ -1,17 +1,15 @@
-/* Simple styling for the Pong game */
-:root{
+:根{
   --bg: #0f1724;
-  --panel: #0b1220;
   --accent: #3ddc84;
   --muted: #9aa4b2;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html,body { height: 100%; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: linear-gradient(180deg,#071022, #071a2c); color: #e6eef6; }
+html,body { height: 100%; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: linear-gradient(180度,#071022, #071a2c); 颜色: #e6eef6;}
 
 .container {
-  max-width: 980px;
-  margin: 36px auto;
+  最大宽度: 980像素;
+  边距: 36像素 居中;
   padding: 18px;
   text-align: center;
 }
@@ -21,35 +19,68 @@ h1 { margin-bottom: 8px; font-weight: 600; color: var(--accent); }
 #scoreboard {
   display: flex;
   justify-content: space-between;
-  margin: 8px 0 14px 0;
-  color: var(--muted);
-  font-weight: 600;
+  边距: 8px 0 10px 0;
+  颜色: var(--静音);
+  font-weight: 700;
 }
 
+#controlsTop {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  对齐方式: 居中;
+  底部边距: 10px;
+  颜色: var(--静音);
+}
+#controlsTop 选择,
+#controlsTop input[type="range"],
+#controlsTop input[type="checkbox"],
+#controlsTop button {
+  margin-left: 6px;
+}
+
+.canvasWrap {
+  position: relative;
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+/* canvas responsive */
 #gameCanvas {
   display: block;
-  margin: 0 auto;
+  width: 100%;
+  height: auto;
   background: radial-gradient(circle at 10% 10%, rgba(255,255,255,0.02), transparent 10%), #07142a;
   border: 3px solid rgba(255,255,255,0.04);
   box-shadow: 0 10px 30px rgba(3,6,23,0.6);
   cursor: crosshair;
+  touch-action: none;
 }
 
-/* Centered overlay text for pause/start */
-.overlay {
+/* overlays (menu / victory), positioned above canvas */
+.overlayUI {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%,-50%);
-  color: rgba(255,255,255,0.9);
-  background: rgba(8,12,20,0.6);
-  padding: 12px 18px;
-  border-radius: 8px;
-  font-weight: 700;
+  min-width: 260px;
+  background: rgba(8,12,20,0.85);
+  color: #fff;
+  padding: 14px;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+  pointer-events: auto;
 }
+.overlayUI h2 { margin-bottom: 8px; color: var(--accent); }
+.overlayUI button { margin-top: 8px; padding: 8px 12px; cursor: pointer; background: #111827; color: #fff; border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; }
+.overlayUI input[type="text"] { padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); color: #fff; }
 
-#controls {
-  margin-top: 12px;
-  color: var(--muted);
-  font-size: 14px;
+#controls { margin-top: 12px; color: var(--muted); font-size: 14px; }
+
+@media (max-width: 420px) {
+  #controlsTop { flex-wrap: wrap; gap: 8px; }
+  #scoreboard { font-size: 14px; }
+  .container { padding: 12px; margin: 18px auto; }
+  .overlayUI { min-width: 200px; }
 }
