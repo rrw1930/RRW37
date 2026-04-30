@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Simple Pong — Responsive + Sound + Difficulty</title>
+  <title>简单乒乓球 — 响应式 + 声音 + 难度 + 本地多人游戏</title>
   <link rel="stylesheet" href="styles.css" />
 </头部>
 <body>
@@ -16,29 +16,66 @@
     </div>
 
     <div id=“controlsTop”>
+      <标签 for=模式>模式：</标签>
+      <选择 id=模式>
+        <选项 value="single" 已选中>单人（Single Player）</选项>
+        <选项 value=“本地”>本地双人（Local Multiplayer）</选项>
+      </选择>
+
       <标签 for="difficulty">难度：</标签>
       <选择 id="difficulty">
-        <选项 value=“简单”>Easy</选项>
+        <选项 value=“简单”>易</选项>
         <选项 value="normal" 已选中>Normal</选项>
         <选项 value=“困难”>Hard</选项>
       </选择>
 
-      <标签 for="soundToggle" title="启用/禁用声音">Sound</标签>
+      <标签 for="pointsToWin">胜局：</标签>
+      <选择 id="pointsToWin">
+        <选项 value="3">3</选项>
+        <选项 value="5" 已选中>5</选项>
+        <选项 value="7">7</选项>
+        <选项 value="11">11</选项>
+      </选择>
+
+      <标签 for="soundToggle" 标题="启用/禁用声音">声音</标签>
       <输入 type="checkbox" id="soundToggle" checked />
 
-      <标签 for="volume" title="音量">Vol</标签>
+      <标签 for="volume" title="音量">音量</标签>
       <输入 type="range" id="volume" min="0" max="1" step="0.01" value="0.7" />
 
-      <按钮 id="resetBtn" title="重置比分">重启</button>
+      <按钮 id="resetBtn" title="重置比分">重置</button>
     </div>
 
     <div class=画布包裹>
-      <画布 id=“游戏画布”></画布>
-      <!-- overlay text drawn by canvas; keep empty here -->
+      <画布 id="gameCanvas" aria-label="Pong 游戏画布"></画布>
+
+      <!-- Menu overlay (DOM) -->
+      <div id="menuOverlay" class="overlayUI">
+        <div id="menuContent">
+          <h2>简单乒乓球</h2>
+          <p id="menuInstructions">点击开始。左侧：鼠标或 W / S；右侧（本地双人）：↑ / ↓</p>
+          <按钮 id="startButton">开始游戏</按钮>
+          <h3>排行榜</h3>
+          <ol id="leaderboardList"></ol>
+        </div>
+      </div>
+
+      <!-- Victory overlay -->
+      <div id="victoryOverlay" class="overlayUI" style="display:无;">
+        <div id="victoryContent">
+          <h2 id="victoryText">胜利！</h2>
+          <标签>请输入名字保存到排行榜： <输入 id=“获奖者姓名” 类型=“文本” 最大长度="20" /></标签>
+          <div style="margin-top:8px;">
+            <按钮 id="saveWinnerBtn">保存</按钮>
+            <按钮 id="closeVictoryBtn">返回菜单</按钮>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div id="controls">
-      <p>控制：把鼠标移到画布上或使用 ↑ / ↓ 键控制左侧球拍。点击画布开始/继续，空格暂停/恢复。</p>
+      <p>控制：左侧玩家使用 W / S 或鼠标（将鼠标移到画布上）；右侧玩家使用 ↑ / ↓（仅本地双人）；单人模式时右侧为 AI。</p>
+      <p>点击画布或按 Enter 开始。空格键暂停/恢复。</p>
     </div>
   </div>
 
